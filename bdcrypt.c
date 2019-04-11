@@ -17,6 +17,7 @@
  *  - bdcrypt_imagepath
  *  - bdcrypt_key
  *  - assert that imagepath and key are set before any bd operations.
+ *  - let user specify salt, number of iterations, md_type for KDF
  *
  * Also, we need to check what the block size should be.
  * This interface makes it appear as if block size is static,
@@ -32,7 +33,7 @@
 #define BDCRYPT_BLOCK_SIZE 1024
 
 static const char *bdcrypt_imagepath = NULL;
-static uint8_t bdcrypt_key[32] = { 0 };
+static uint8_t bdcrypt_key[64] = { 0 };
 static FILE *bdcrypt_devfile = NULL;
 static struct rho_cipher *bdcrypt_cipher = NULL;
 
@@ -94,9 +95,6 @@ bdcrypt_open(struct ext4_blockdev *bdev)
 	bdcrypt.part_size = rho_path_getsize(bdcrypt_imagepath);
 	bdcrypt.bdif->ph_bcnt = bdcrypt.part_size / bdcrypt.bdif->ph_bsize;
 
-    /* TODO: move to bdcrypt_init */
-    bdcrypt_cipher = rho_cipher_create(RHO_CIPHER_AES_256_CBC,
-            RHO_CIPHER_MODE_ENCRYPT, false, bdcrypt_key, NULL);
 
 done:
     RHO_TRACE_EXIT("error=%d", error);
@@ -217,17 +215,29 @@ bdcrypt_close(struct ext4_blockdev *bdev)
  * INITIALIZATION
  **************************************/
 struct ext4_blockdev *
-bdcrypt_init(const char *path, const char *password)
+bdcrypt_init(const char *path, const char *password, 
+        enum rho_cipher_type cipher)
 {
+    size_t keylen =0;
+
     RHO_TRACE_ENTER("path=%s, password=%s", path, password);
 
     bdcrypt_imagepath = rhoL_strdup(path);
 
-    /* TODO: let user specify salt, number of iterations, md_type */
-    rho_kdf_pbkdf2hmac_oneshot(password, NULL, 0, 1000, RHO_MD_SHA256,
-            bdcrypt_key, 32);
+    if (cipher == RHO_CIPHER_AES_256_XTS)
+        keylen = 64;
+    else if (cipher == RHO_CIPHER_AES_256_CBC)
+        keylen = 32;
+    else
+        rho_die("invalid cipher (%ld)\n", (long)cipher);
 
-    rho_hexdump(bdcrypt_key, 32, "bdcrypt_key");
+    rho_kdf_pbkdf2hmac_oneshot(password, NULL, 0, 1000, RHO_MD_SHA256,
+        bdcrypt_key, keylen);
+
+    rho_hexdump(bdcrypt_key, keylen, "bdcrypt_key");
+
+    bdcrypt_cipher = rho_cipher_create(cipher,
+            RHO_CIPHER_MODE_ENCRYPT, false, bdcrypt_key, NULL);
 
     RHO_TRACE_EXIT();
     return (&bdcrypt);

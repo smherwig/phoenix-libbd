@@ -6,6 +6,7 @@
 #include <ext4_config.h>
 #include <ext4_blockdev.h>
 
+#include <rho/rho_crypto.h>
 #include <rho/rho_decls.h>
 
 RHO_DECLS_BEGIN
@@ -25,11 +26,12 @@ struct ext4_blockdev * bdstd_init(const char *path);
 struct ext4_blockdev * bdverity_init(const char *fspath, const char *mtpath,
         const char *macpassword, uint8_t *roothash);
 
-struct ext4_blockdev * bdcrypt_init(const char *path, const char *encpassword);
+struct ext4_blockdev * bdcrypt_init(const char *path, const char *encpassword,
+        enum rho_cipher_type cipher);
 
 struct ext4_blockdev * bdvericrypt_init(const char *fspath,
         const char *mtpath, const char *macpassword, uint8_t *roothash,
-        const char *encpassword);
+        const char *encpassword, enum rho_cipher_type cipher);
 
 RHO_DECLS_END
 

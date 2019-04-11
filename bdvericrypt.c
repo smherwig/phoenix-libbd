@@ -13,12 +13,18 @@
 #include "bd_util.h"
 #include "mt.h"
 
+/*
+ * TODO: 
+ *  - apply a KDF to the macpassword
+ *  - let user specify salt, number of iterations, md_type for KDF
+ */
+
 #define BDVERICRYPT_BLOCK_SIZE  1024
 #define BDVERICRYPT_HASH_SIZE   32
 
 static const char *bdvericrypt_imagepath = NULL;
 static FILE *bdvericrypt_devfile = NULL;
-static uint8_t bdvericrypt_enckey[32] = { 0 };
+static uint8_t bdvericrypt_enckey[64] = { 0 };
 static struct rho_cipher *bdvericrypt_cipher = NULL;
 
 static const char *bdvericrypt_mtpath = NULL;
@@ -83,9 +89,6 @@ bdvericrypt_open(struct ext4_blockdev *bdev)
 
     bdvericrypt_mt = mt_open(bdvericrypt_mtpath, bdvericrypt_hashfn, BDVERICRYPT_HASH_SIZE,
             bdvericrypt_roothash);
-
-    bdvericrypt_cipher = rho_cipher_create(RHO_CIPHER_AES_256_CBC,
-            RHO_CIPHER_MODE_ENCRYPT, false, bdvericrypt_enckey, NULL);
 
     goto succeed;
 
@@ -235,8 +238,10 @@ bdvericrypt_close(struct ext4_blockdev *bdev)
  **************************************/
 struct ext4_blockdev *
 bdvericrypt_init(const char *fspath, const char *mtpath, const char *macpassword,
-        uint8_t *roothash, const char *encpassword)
+        uint8_t *roothash, const char *encpassword, enum rho_cipher_type cipher)
 {
+    size_t keylen = 0;
+
     RHO_TRACE_ENTER("fspath=%s, fspassword=%s, mtpath=%s, macpassword=%s",
             fspath, encpassword, mtpath, macpassword);
 
@@ -245,26 +250,23 @@ bdvericrypt_init(const char *fspath, const char *mtpath, const char *macpassword
 
     memcpy(bdvericrypt_roothash, roothash, 32); /* TODO: don't hardcode */
 
-    /* 
-     * For now, we just use the mac_password as is; we need to update 
-     * makemerkel.py to use the kdf
-     */
-#if 0
-    rho_kdf_pbkdf2hmac_oneshot(macpassword, NULL, 0, 1000, RHO_MD_SHA256,
-            bdvericrypt_mackey, 32);
-    rho_hexdump(bdvericrypt_mackey, 32, "bdvericrypt_mackey");
-#endif
-
     bdvericrypt_hmac = rho_hmac_create(RHO_MD_SHA256, macpassword,
             strlen(macpassword));
 
-    /* TODO: let user specify salt, number of iterations, md_type */
+    if (cipher == RHO_CIPHER_AES_256_XTS)
+        keylen = 64;
+    else if (cipher == RHO_CIPHER_AES_256_CBC)
+        keylen = 32;
+    else
+        rho_die("invalid cipher (%ld)\n", (long)cipher);
+
     rho_kdf_pbkdf2hmac_oneshot(encpassword, NULL, 0, 1000, RHO_MD_SHA256,
-            bdvericrypt_enckey, 32);
-    rho_hexdump(bdvericrypt_enckey, 32, "bdvericrypt_enckey");
+            bdvericrypt_enckey, keylen);
 
+    rho_hexdump(bdvericrypt_enckey, keylen, "bdvericrypt_enckey");
 
-
+    bdvericrypt_cipher = rho_cipher_create(cipher,
+            RHO_CIPHER_MODE_ENCRYPT, false, bdvericrypt_enckey, NULL);
 
     RHO_TRACE_EXIT();
     return (&bdvericrypt);
