@@ -122,7 +122,7 @@ bdcrypt_bread(struct ext4_blockdev *bdev, void *buf, uint64_t blk_id,
 
     /* read in all blocks at once */
     off = blk_id * bdev->bdif->ph_bsize;
-    fprintf(stderr, "bdcrypt_bread: file offset=%ld\n", off);
+    //fprintf(stderr, "bdcrypt_bread: file offset=%ld\n", off);
 	if (-1 == fseeko(bdcrypt_devfile, off, SEEK_SET)) {
         rho_errno_warn(errno, "fseek(bdcrypt_devfile, %ld)", off);
         error = EIO;
@@ -130,7 +130,7 @@ bdcrypt_bread(struct ext4_blockdev *bdev, void *buf, uint64_t blk_id,
     }
 
     n = bdev->bdif->ph_bsize * blk_cnt;
-    fprintf(stderr, "reading %zu bytes\n", n);
+    //fprintf(stderr, "reading %zu bytes\n", n);
 	if (!fread(buf, n, 1, bdcrypt_devfile)) {
         rho_warn("fread(bdcrypt_devfile) %zu bytes failed", n);
         error = EIO;
@@ -140,13 +140,13 @@ bdcrypt_bread(struct ext4_blockdev *bdev, void *buf, uint64_t blk_id,
     /* decrypt each block individually */
     for (i = 0; i < blk_cnt; i++) { 
         bd_iv_from_blk_id(blk_id + i, iv, 16);
-        rho_hexdump(iv, 16, "iv");  
+        //rho_hexdump(iv, 16, "iv");  
         rho_cipher_reset(bdcrypt_cipher, RHO_CIPHER_MODE_DECRYPT, false, NULL, iv);
         rho_cipher_update(bdcrypt_cipher, buf + (i * bdev->bdif->ph_bsize), 
                 bdev->bdif->ph_bsize, tmpblk, &outlen);
 
-        rho_hexdump(tmpblk, BDCRYPT_BLOCK_SIZE, "after rho_cipher_update");
-        fprintf(stderr, "outlen=%zu\n", outlen);
+        //rho_hexdump(tmpblk, BDCRYPT_BLOCK_SIZE, "after rho_cipher_update");
+        //fprintf(stderr, "outlen=%zu\n", outlen);
         /* XXX: is 'finish' even needed? */
         rho_cipher_finish(bdcrypt_cipher, tmpblk + outlen, &extralen);
         memcpy(buf + (i * bdev->bdif->ph_bsize), tmpblk, BDCRYPT_BLOCK_SIZE);
@@ -234,7 +234,7 @@ bdcrypt_init(const char *path, const char *password,
     rho_kdf_pbkdf2hmac_oneshot(password, NULL, 0, 1000, RHO_MD_SHA256,
         bdcrypt_key, keylen);
 
-    rho_hexdump(bdcrypt_key, keylen, "bdcrypt_key");
+    //rho_hexdump(bdcrypt_key, keylen, "bdcrypt_key");
 
     bdcrypt_cipher = rho_cipher_create(cipher,
             RHO_CIPHER_MODE_ENCRYPT, false, bdcrypt_key, NULL);

@@ -152,14 +152,14 @@ bdvericrypt_bread(struct ext4_blockdev *bdev, void *buf, uint64_t blk_id,
     /* decrypt each block individually */
     for (i = 0; i < blk_cnt; i++) { 
         bd_iv_from_blk_id(blk_id + i, iv, 16);
-        rho_hexdump(iv, 16, "iv");  
+        //rho_hexdump(iv, 16, "iv");  
         rho_cipher_reset(bdvericrypt_cipher, RHO_CIPHER_MODE_DECRYPT, false,
                 NULL, iv);
         rho_cipher_update(bdvericrypt_cipher, buf + (i * bdev->bdif->ph_bsize),
                 bdev->bdif->ph_bsize, tmpblk, &outlen);
 
-        rho_hexdump(tmpblk, BDVERICRYPT_BLOCK_SIZE, "after rho_cipher_update");
-        fprintf(stderr, "outlen=%zu\n", outlen);
+        //rho_hexdump(tmpblk, BDVERICRYPT_BLOCK_SIZE, "after rho_cipher_update");
+        //fprintf(stderr, "outlen=%zu\n", outlen);
         /* XXX: is 'finish' even needed? */
         rho_cipher_finish(bdvericrypt_cipher, tmpblk + outlen, &extralen);
         memcpy(buf + (i * bdev->bdif->ph_bsize), tmpblk,
