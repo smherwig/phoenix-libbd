@@ -30,7 +30,7 @@
  *    block sizes?
  */
 
-#define BDCRYPT_BLOCK_SIZE 1024
+#define BDCRYPT_BLOCK_SIZE 4096
 
 static const char *bdcrypt_imagepath = NULL;
 static uint8_t bdcrypt_key[64] = { 0 };

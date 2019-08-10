@@ -45,7 +45,7 @@
 #include "bd.h"
 
 /**@brief   Image block size.*/
-#define EXT4_FILEDEV_BSIZE 512
+#define EXT4_FILEDEV_BSIZE 4096
 
 static const char *bdstd_imagepath = NULL;
 static FILE *bdstd_devfile = NULL;

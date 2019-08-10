@@ -19,7 +19,7 @@
  *  - let user specify salt, number of iterations, md_type for KDF
  */
 
-#define BDVERICRYPT_BLOCK_SIZE  1024
+#define BDVERICRYPT_BLOCK_SIZE  4096
 #define BDVERICRYPT_HASH_SIZE   32
 
 static const char *bdvericrypt_imagepath = NULL;
@@ -28,10 +28,7 @@ static uint8_t bdvericrypt_enckey[64] = { 0 };
 static struct rho_cipher *bdvericrypt_cipher = NULL;
 
 static const char *bdvericrypt_mtpath = NULL;
-static uint8_t bdvericrypt_roothash[32] = { 0 };
-#if 0
-static uint8_t bdvericrypt_mackey[32] = { 0 };
-#endif
+static uint8_t bdvericrypt_roothash[BDVERICRYPT_HASH_SIZE] = { 0 };
 static struct mt *bdvericrypt_mt = NULL;
 static struct rho_hmac *bdvericrypt_hmac = NULL;
 
@@ -248,7 +245,7 @@ bdvericrypt_init(const char *fspath, const char *mtpath, const char *macpassword
     bdvericrypt_imagepath = rhoL_strdup(fspath);
     bdvericrypt_mtpath = rhoL_strdup(mtpath);
 
-    memcpy(bdvericrypt_roothash, roothash, 32); /* TODO: don't hardcode */
+    memcpy(bdvericrypt_roothash, roothash, BDVERICRYPT_HASH_SIZE);
 
     bdvericrypt_hmac = rho_hmac_create(RHO_MD_SHA256, macpassword,
             strlen(macpassword));

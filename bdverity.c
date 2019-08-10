@@ -12,7 +12,7 @@
 #include "bd.h"
 #include "mt.h"
 
-#define BDVERITY_BLOCK_SIZE  1024
+#define BDVERITY_BLOCK_SIZE  4096
 #define BDVERITY_HASH_SIZE   32
 
 static const char *bdverity_imagepath = NULL;
@@ -20,7 +20,7 @@ static FILE *bdverity_devfile = NULL;
 
 static const char *bdverity_mtpath = NULL;
 static struct mt *bdverity_mt = NULL;
-static uint8_t bdverity_roothash[32] = { 0 };
+static uint8_t bdverity_roothash[BDVERITY_HASH_SIZE] = { 0 };
 static struct rho_hmac *bdverity_hmac = NULL;
 
 static int bdverity_open(struct ext4_blockdev *bdev);
@@ -196,7 +196,7 @@ bdverity_init(const char *fspath, const char *mtpath,
 
     bdverity_imagepath = rhoL_strdup(fspath);
     bdverity_mtpath = rhoL_strdup(mtpath);
-    memcpy(bdverity_roothash, roothash, 32); /* TODO: don't hardcode */
+    memcpy(bdverity_roothash, roothash, BDVERITY_HASH_SIZE);
 
     /* 
      * For now, we just use the mac_password as is; we need to update 
