@@ -1,6 +1,7 @@
 Overview
 ========
-libbd is a block device library for Phoenix SGX microkernel's
+libbd is a block device library for
+[Phoenix](https://github.com/smherwig/phoenix) SGX microkernel's
 [nextfs](https://github.com/smherwig/phoenix-fileserver) filesystem.
 
 
