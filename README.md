@@ -1,7 +1,7 @@
 Overview
 ========
 libbd is a block device library for Phoenix SGX microkernel's
-[nextfs](https://github.com/smherwig/phoenix-fileserver) [filesystem].
+[nextfs](https://github.com/smherwig/phoenix-fileserver) filesystem.
 
 
 Building and Installing
@@ -44,4 +44,4 @@ make
 make install INSTALL_TOP=$HOME
 ```
 
-The installation installs a staic library, `libbd.a`, and header `bd.h`.
+The installation installs a static library, `libbd.a`, and header `bd.h`.
