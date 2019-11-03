@@ -7,13 +7,11 @@ libbd is a block device library for
 
 Building and Installing
 =======================
-I will assume that sources are downloaded to `$HOME/src/` and that artifacts
-are installed under `$HOME`.  libbd depends on [lwext4](https://github.com/gkostka/lwext4) and [librho](https://github.com/smherwig/librho).
-
-
-First download and install lwext4.  I have a
-[fork](https://github.com/smherwig/lwext4) of gkostka's lwext4 that adds
-a `Makefile.smherwig` for the purpose of simplifying installation.
+libbd depends on [librho](https://github.com/smherwig/librho) and
+[lwext4](https://github.com/gkostka/lwext4).  The
+instructions here assume that both are installed under `$HOME`.
+ I have a [fork](https://github.com/smherwig/lwext4) of gkostka's lwext4 that adds
+a `Makefile.smherwig` for the purpose of simplifying lwext4's installation.
 
 ```
 cd ~/src
@@ -23,19 +21,7 @@ make -f Makefile.smherwig
 make -f Makefile.smherwig install INSTALL_TOP=$HOME
 ```
 
-
-Next, download, build, and install
-[librho](https://github.com/smherwig/librho):
-
-```
-git clone https:/github.com/smherwig/librho
-cd librho/src
-make
-make install INSTALL_TOP=$HOME
-```
-
-
-Download, build, and install libbd:
+Next, Download, build, and install libbd:
 
 ```
 cd ~/src
