@@ -5,8 +5,8 @@ libbd is a block device library for
 [nextfs](https://github.com/smherwig/phoenix-fileserver) filesystem.
 
 
-Building and Installing
-=======================
+<a name="building"/> Building and Installing
+============================================
 libbd depends on [librho](https://github.com/smherwig/librho) and
 [lwext4](https://github.com/gkostka/lwext4).  The
 instructions here assume that both are installed under `$HOME`.
