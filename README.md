@@ -1,6 +1,6 @@
 Overview
 ========
-libbd is a block device library for
+libbd is a block device library for the
 [Phoenix](https://github.com/smherwig/phoenix) SGX microkernel's
 [nextfs](https://github.com/smherwig/phoenix-fileserver) filesystem.
 
@@ -21,7 +21,7 @@ make -f Makefile.smherwig
 make -f Makefile.smherwig install INSTALL_TOP=$HOME
 ```
 
-Next, Download, build, and install libbd:
+Next, download, build, and install libbd:
 
 ```
 cd ~/src
