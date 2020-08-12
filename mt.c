@@ -669,33 +669,6 @@ done:
     return (ret);
 }
 
-/* 
- * this is called after a bwrite to fs image (or just before -- 
- * I'm not sure that it matters).  The contents of the write are `block`,
- * and `blk_id` is the block being written to
- *
- * Let's assume that the fs image is unencrypted (that is, we 
- * are just using bdverity, and not bdvericrypt).  Suppose the attacker
- * modifies both the fs image and the mt file just prior to an update.
- * As is, the attacker can do this in a way that obeys the merkle tree.
- *
- * Currently, there is no good way for the filesystem/block layer to detect
- * this.  On an update, we don't verify the merkletree.  Even if we did 
- * check, jus prior to updating the merkletree, that the branch we are updating
- * is consistent, the attacker can just insert his modifications just after
- * this check and just before our update.
- *
- * One method to counter this it to have have the merkle tree be of MACs,
- * rather than of straight SHA-256 hashes.  In this way, the attacker
- * cannot modify the merkle tree in a self-coherent way.
- *
- * So, I think the strawman is to use MACs instead of SHA-256 hashes for the
- * nodes of the merkletree.  There are probably attacks against this --
- * basically known plaintext attacks where the attacker could determine the
- * hash key.  This entails changing the MAC key in some fashion (as based
- * on a generation number or block id).  I would read the strongbox paper
- * for ideas befor you implement anything.
- */
 void
 mt_update(struct mt *mt, const void *blk, size_t blk_size, uint64_t blk_id)
 {
@@ -718,6 +691,13 @@ mt_update(struct mt *mt, const void *blk, size_t blk_size, uint64_t blk_id)
     mt->hashfn(blk, blk_size, sibling_hashes[si]);
     mt_write_index(mt, cur_ai, sibling_hashes[si]);
 
+    /* FIXME: add rollback attack mitigation.
+     * 
+     * Verify current branch values as you compute 
+     * the new branch values; do not write the new branch values 
+     * -- save them.  Once you have verified the current branch,
+     * commit these saved values.
+     */
     /* propagate up to the root */
     while (cur_ai != 0) {
         sibling_ai = MT_SIBLING_INDEX(cur_ai);
